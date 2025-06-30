@@ -1,0 +1,61 @@
+{% extends "attendance/base.html" %}
+{% block title %}Monthly Detailed Attendance Report{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Monthly Detailed Attendance Report</h2>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-auto">
+    <label class="form-label">Start Date</label>
+    <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="form-control">
+  </div>
+  <div class="col-auto">
+    <label class="form-label">End Date</label>
+    <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="form-control">
+  </div>
+
+  <div class="col-auto align-self-end">
+    <button type="submit" class="btn btn-primary">Filter</button>
+  </div>
+</form>
+<div class="mb-3">
+  <a href="{% url 'export_monthly_detailed_excel' %}?start_date={{ start_date }}&end_date={{ end_date }}" class="btn btn-success me-2">
+    Export Excel
+  </a>
+  <a href="{% url 'export_monthly_detailed_pdf' %}?start_date={{ start_date }}&end_date={{ end_date }}" class="btn btn-danger">
+    Export PDF
+  </a>
+</div>
+{% for entry in report %}
+<h4>{{ entry.person.name }}</h4>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Check-in</th>
+      <th>Checkout</th>
+      <th>Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in entry.rows %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ row.checkin|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ row.checkout|date:"Y-m-d H:i:s" }}</td>
+      <td>{{ row.duration }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="4">No records.</td>
+    </tr>
+    {% endfor %}
+    <tr class="table-success">
+      <td colspan="3"><strong>Total Duration</strong></td>
+      <td><strong>{{ entry.total_duration }}</strong></td>
+    </tr>
+  </tbody>
+</table>
+{% endfor %}
+
+{% endblock %}

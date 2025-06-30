@@ -1,0 +1,126 @@
+{% extends 'attendance/base.html' %}
+{% block content %}
+<h3 class="mb-4 text-center">Attendance Records</h3>
+
+<!-- Filter Form -->
+<form method="get" class="row mb-4"  id="exportForm">
+  {% comment %} <div class="col-md-3">
+    <label class="form-label">Filter by Action</label>
+    <select name="action" class="form-select">
+      <option value="">All</option>
+      <option value="in" {% if request.GET.action == 'in' %}selected{% endif %}>Check-in Only</option>
+      <option value="out" {% if request.GET.action == 'out' %}selected{% endif %}>Check-out Only</option>
+    </select>
+  </div> {% endcomment %}
+  <div class="col-md-4">
+    <label class="form-label">Date</label>
+    <input type="date" name="date" id="exportDate" value="{{ selected_date|date:'Y-m-d' }}" class="form-control">
+  </div>
+  <div class="col-md-3">
+    <label for="q" class="form-label">Name</label>
+    <input type="text" class="form-control" name="name" placeholder="Name..." value="{{ request.GET.name }}">
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary me-2">Filter</button>
+    <a href="?" class="btn btn-secondary">Reset</a>
+  </div>
+
+  <div class="row g-2 mb-3">
+    {% comment %} <div class="col-auto">
+      <input type="date" name="date" id="exportDate" class="form-control" required>
+    </div> {% endcomment %}
+    <div class="col-auto">
+      <a href="#" onclick="exportExcel()" class="btn btn-success me-2">Export Excel</a>
+      <a href="#" onclick="exportPDF()" class="btn btn-danger">Export PDF</a>
+    </div>
+  </div>
+</form>
+
+<script>
+function exportExcel() {
+  const date = document.getElementById("exportDate").value;
+  if (date) {
+    window.location.href = "{% url 'export_attendance_day_excel' %}?date=" + date;
+  } else {
+    alert("Please select a date");
+  }
+}
+function exportPDF() {
+  const date = document.getElementById("exportDate").value;
+  if (date) {
+    window.location.href = "{% url 'export_attendance_day_pdf' %}?date=" + date;
+  } else {
+    alert("Please select a date");
+  }
+}
+</script>
+<!-- Attendance Table -->
+<div class="table-responsive">
+  <table class="table table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>No</th>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Check In</th>
+        <th>Check Out</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in records %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ row.person.name }}</td>
+        <td>{{ row.date }}</td>
+        <td>{{ row.checkin|date:"H:i:s" }}</td>
+        <td>{{ row.checkout|date:"H:i:s" }}</td>
+        <td>
+          {% if row.duration %}
+            {{ row.duration }}
+          {% else %}
+            -
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-center">No records found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination Controls -->
+<nav aria-label="Attendance pagination">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if action_filter %}action={{ action_filter }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Previous</span></li>
+    {% endif %}
+
+    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if action_filter %}action={{ action_filter }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Next</span></li>
+    {% endif %}
+  </ul>
+</nav>
+
+<!-- Datepicker Script -->
+<script>
+  $(document).ready(function(){
+    $('.datepicker').datepicker({
+      format: 'yyyy-mm-dd',
+      autoclose: true,
+      todayHighlight: true
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "attendance/base.html" %}
+{% block title %}Delete Person{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow border-0">
+      <div class="card-body text-center">
+        <h3 class="mb-4 text-danger">Delete Person</h3>
+        <p>Are you sure you want to delete <strong>{{ person.name }}</strong>?</p>
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

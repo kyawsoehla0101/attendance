@@ -1,0 +1,105 @@
+<!-- qr_scanner.html -->
+{% extends 'attendance/base.html' %}
+{% block title %}QR Scanner{% endblock %}
+{% block content %}
+<h2 class="mb-4">QR Scanner</h2>
+<div class="text-center">
+    <div id="reader" style="width:300px; margin:auto;"></div>
+    <p id="result" class="mt-3"></p>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmLabel">Confirm QR Check</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="qrText"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="confirmBtn" type="button" class="btn btn-success">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+{% comment %} <script>
+    function showToast(message) {
+        document.getElementById('toast-body').innerText = message;
+        const toast = new bootstrap.Toast(document.getElementById('liveToast'));
+        toast.show();
+    }
+
+    function handleScanSuccess(decodedText, decodedResult) {
+        fetch("{% url 'scan_qr' %}", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: 'qr_data=' + encodeURIComponent(decodedText)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const message = data.action || data.message || "Something went wrong";
+            showToast("✅ " + message);
+            document.getElementById("result").innerText = message;
+        });
+    }
+
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        handleScanSuccess
+    );
+</script> {% endcomment %}
+<script>
+    let scannedText = "";
+
+    function showToast(message) {
+        document.getElementById('toast-body').innerText = message;
+        const toast = new bootstrap.Toast(document.getElementById('liveToast'));
+        toast.show();
+    }
+
+    function handleScanSuccess(decodedText, decodedResult) {
+        scannedText = decodedText;
+        document.getElementById("qrText").innerText = "Do you want to confirm this QR?\n" + decodedText;
+        const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        modal.show();
+    }
+
+    document.getElementById("confirmBtn").addEventListener("click", function () {
+        fetch("{% url 'scan_qr' %}", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: 'qr_data=' + encodeURIComponent(scannedText)
+        })
+        .then(response => response.json())
+        .then(data => {
+            showToast(data.message || data.action || "Success");
+        });
+
+        // Hide modal
+        bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+    });
+
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        handleScanSuccess
+    );
+
+    
+</script>
+
+{% endblock %}

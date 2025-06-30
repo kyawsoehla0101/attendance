@@ -1,0 +1,136 @@
+{% extends 'attendance/base.html' %}
+{% block title %}Attendance List{% endblock %}
+{% block content %}
+<div>
+    {% comment %} <h2 class="mb-4 text-center">အာရက္ခတပ်တော်</h2> {% endcomment %}
+    <h3 class="mb-4 text-center">All Attendance History<hr/></h3>
+</div>
+
+<form method="get" class="row g-3 mb-4 align-items-end">
+    <div class="col-md-2">
+        <label class="form-label">Start Date</label>
+        <input type="text" class="form-control datepicker" placeholder="Start Date(Eg - 2025-06-26)" name="start_date" value="{{ request.GET.start_date }}">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">End Date</label>
+        <input type="text" class="form-control datepicker" placeholder="End Date(Eg - 2025-06-26)" name="end_date" value="{{ request.GET.end_date }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-control" name="q" value="{{ request.GET.q }}" placeholder="Enter Name...">
+    </div>
+    <div class="col-md-2">
+    <label class="form-label">Check IN/OUT</label>
+    <select class="form-select" name="action">
+        <option value="">All</option>
+        <option value="in" {% if request.GET.action == 'in' %}selected{% endif %}>Check In</option>
+        <option value="out" {% if request.GET.action == 'out' %}selected{% endif %}>Check Out</option>
+    </select>
+    </div>
+    <div class="col-md-3 text-end">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{% url 'attendance_list' %}" class="btn btn-secondary">Reset</a>
+    </div>
+    
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Check IN / OUT</th>
+                <th>Date and Time</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in attendances %}
+            <tr>
+                <td>{{ record.person.name }}</td>
+                <td>{% if record.action == 'in' %}
+                    <span class="text-success">Check in</span>
+                    {% else %} <span class="text-danger">Check out</span>
+                    {% endif %}</td>
+                    <td>{{ record.timestamp }}</td>
+                    {% if row.duration %}
+        {{ row.duration }}
+    {% else %}
+        
+    {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% comment %} <div class="table-responsive">
+  <table class="table table-bordered table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Check-in</th>
+        <th>Check-out</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in records %}
+      <tr>
+        <td>{{ row.person.name }}</td>
+        <td>{{ row.date }}</td>
+        <td>{{ row.checkin|date:"H:i:s" }}</td>
+        <td>{{ row.checkout|date:"H:i:s" }}</td>
+        <td>
+          {% if row.duration %}
+            {{ row.duration }}
+          {% else %}
+            -
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="text-center">No records found</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div> {% endcomment %}
+
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if attendances.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ attendances.previous_page_number }}&q={{ request.GET.q }}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}">Previous</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        {% endif %}
+
+        <li class="page-item disabled"><span class="page-link">Page {{ attendances.number }} of {{ attendances.paginator.num_pages }}</span></li>
+
+        {% if attendances.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ attendances.next_page_number }}&q={{ request.GET.q }}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}">Next</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+        {% endif %}
+    </ul>
+</nav>
+
+<script>
+    $(document).ready(function(){
+        $('.datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayHighlight: true
+        });
+    });
+</script>
+{% endblock %}

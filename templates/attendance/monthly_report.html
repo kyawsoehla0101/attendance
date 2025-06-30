@@ -1,0 +1,46 @@
+{% extends "attendance/base.html" %}
+{% block title %}Monthly Attendance Report{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Monthly Attendance Report</h2>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-auto">
+    <label class="form-label">Start Date</label>
+    <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="form-control">
+  </div>
+  <div class="col-auto">
+    <label class="form-label">End Date</label>
+    <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="form-control">
+  </div>
+  <div class="col-auto align-self-end">
+    <button type="submit" class="btn btn-primary">Filter</button>
+  </div>
+  <div class="col-end">
+    <a href="{% url 'export_monthly_report_excel' %}?start_date={{ start_date }}&end_date={{ end_date }}" class="btn btn-success">
+      Export Excel
+    </a>
+  </div>
+</form>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Person</th>
+      <th>Check-in Count</th>
+      <th>Total Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in report %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ row.person.name }}</td>
+      <td>{{ row.checkin_count }}</td>
+      <td>{{ row.total_duration }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

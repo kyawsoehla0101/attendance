@@ -94,7 +94,7 @@ DATABASES = {
         'NAME': 'attendance',  # your database name
         'USER': 'root',  # your MySQL username
         'PASSWORD': 'kyawsoehla0101',  # your MySQL password
-        'HOST': 'localhost',  # or use IP address if needed
+        'HOST': '192.168.130.217',  # or use IP address if needed
         'PORT': '3306',  # default MySQL port
     }
 }
